@@ -1,0 +1,26 @@
+#enconding: utf-8
+execution:
+- concurrency: 1
+  hold-for: 4m
+  ramp-up: 1m
+  scenario: sample
+  
+scenarios:
+  sample:
+    headers:
+        Connection: close
+    script: ProyectoTest.jmx 
+
+reporting:
+- module: final-stats
+  dump-xml: ProyectoTest.xml
+
+modules:
+  jmeter:
+    path: /opt/jmeter
+    
+settings:
+  check-interval: 5s
+  default-executor: jmeter
+
+provisioning: local
