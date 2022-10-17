@@ -1,0 +1,27 @@
+#enconding: utf-8
+execution:
+- concurrency: 1
+  ramp-up: 1m
+  hold-for: 5m
+  iterations: 10
+  scenario: Baseline
+  
+scenarios:
+  Baseline:
+    headers:
+        Connection: close
+    script: ConsultaEmpleadoBaseline.jmx 
+
+modules:
+  jmeter:
+    path: /opt/apache-jmeter
+    
+reporting:
+- module: final-stats
+  dump-xml: ConsultaEmpleadoBaseline.xml
+  
+settings:
+  check-interval: 5s
+  default-executor: jmeter
+
+provisioning: local

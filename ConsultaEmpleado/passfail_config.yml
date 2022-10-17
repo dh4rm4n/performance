@@ -1,0 +1,7 @@
+---
+reporting:
+- module: passfail
+  criteria:
+  - avg-rt>3s, continue as failed
+  - p90>3s, continue as failed
+  - fail>5%, continue as failed
