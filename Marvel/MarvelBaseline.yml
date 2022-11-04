@@ -10,7 +10,7 @@ scenarios:
   Baseline:
     headers:
         Connection: close
-    script: ConsultaEmpleadoBaseline.jmx 
+    script: MarvelBaseline.jmx 
 
 modules:
   jmeter:
@@ -18,7 +18,7 @@ modules:
     
 reporting:
 - module: final-stats
-  dump-xml: ConsultaEmpleadoBaseline.xml
+  dump-xml: MarvelBaseline.xml
   
 settings:
   check-interval: 5s

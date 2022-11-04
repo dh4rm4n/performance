@@ -24,16 +24,16 @@ pipeline
 		stage('Performance_GenerarSet_Datos') {
 			steps {	
 				echo 'Performance Guardar Build And JobName'					 
-				sh "jmeter -n -t $WORKSPACE/ConsultaEmpleado/Build.jmx -JJOB_NAME=Baseline_${env.BUILD_NUMBER}"
+				sh "jmeter -n -t $WORKSPACE/Marvel/Build.jmx -JJOB_NAME=Baseline_${env.BUILD_NUMBER}"
 				}
 		}
-		stage('Ejecutar prueba Baseline ConsultaEmpleadoBaseline') {
+		stage('Ejecutar prueba Baseline MarvelBaseline') {
             steps {
 				script {
 					try{
-						echo "Performance WS ConsultaEmpleadoBaselineBaseline"
-						sh "bzt ConsultaEmpleado/ConsultaEmpleadoBaseline.yml ConsultaEmpleado/passfail_config.yml"
-						perfReport 'ConsultaEmpleadoBaseline.xml'						
+						echo "Performance WS MarvelBaselineBaseline"
+						sh "bzt Marvel/MarvelBaseline.yml Marvel/passfail_config.yml"
+						perfReport 'MarvelBaseline.xml'						
 					} 
 					catch(ex)
                     {
@@ -46,12 +46,12 @@ pipeline
 	}
 	post {		
         success {  
-			//bat "7z.exe a LogConsultaEmpleadoBaselineBaseline_${env.BUILD_NUMBER}.zip ConsultaCampanas\\LogConsultaEmpleadoBaselineBaseline.jtl"
+			//bat "7z.exe a LogMarvelBaselineBaseline_${env.BUILD_NUMBER}.zip ConsultaCampanas\\LogMarvelBaselineBaseline.jtl"
         	enviarCorreo("SUCCESS")
         }  
         failure {  
-			//bat "7z.exe a LogConsultaEmpleadoBaselineBaseline_${env.BUILD_NUMBER}.zip ConsultaCampanas\\LogConsultaEmpleadoBaselineBaseline.jtl"
-			//perfReport 'ConsultaEmpleadoBaselineBaseline.xml'						
+			//bat "7z.exe a LogMarvelBaselineBaseline_${env.BUILD_NUMBER}.zip ConsultaCampanas\\LogMarvelBaselineBaseline.jtl"
+			//perfReport 'MarvelBaselineBaseline.xml'						
             enviarCorreo("FAILURE")
         }
     }
@@ -62,14 +62,14 @@ def enviarCorreo(resultadoTest) {
     def recibe = "dh4rm4n@gmail.com"
     def resultado = ""
     def hero = ""
-    def nombreProyecto = "ConsultaEmpleadoBaseline"
+    def nombreProyecto = "MarvelBaseline"
     def currentTime = new Date(currentBuild.timeInMillis)    
 	def currentTimeFinal = new Date(currentBuild.timeInMillis + TimeUnit.MINUTES.toMillis(10))
     def formato = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
 	def formatoTimeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
     def timeInicioPruebas = formato.format(currentTime)
 	
-	def NOMBRE_TRANSACCION = "ConsultaEmpleadoBaseline" //Nombre del proyecto para asunto del correo
+	def NOMBRE_TRANSACCION = "MarvelBaseline" //Nombre del proyecto para asunto del correo
 	def NOMBRE_PROYECTO_GIT = "Performance" //Nombre del proyecto en GIT
 	
 	if (resultadoTest == "SUCCESS") {
@@ -339,7 +339,7 @@ def enviarCorreo(resultadoTest) {
 		</html>
 	"""
 	emailext(
-		attachmentsPattern: "**/LogConsultaEmpleadoBaseline_${env.BUILD_NUMBER}.zip",
+		attachmentsPattern: "**/LogMarvelBaseline_${env.BUILD_NUMBER}.zip",
 		subject: "${asunto}",
 		body: "${body}",
 		to: "${recibe}"
