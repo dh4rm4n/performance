@@ -1,25 +1,24 @@
 #enconding: utf-8
 execution:
 - concurrency: 1
+  hold-for: 4m
   ramp-up: 1m
-  hold-for: 5m
-  iterations: 10
-  scenario: Baseline
+  scenario: sample
   
 scenarios:
-  Baseline:
+  sample:
     headers:
         Connection: close
-    script: MarvelBaseline.jmx 
+    script: Marvel.jmx 
+
+reporting:
+- module: final-stats
+  dump-xml: Marvel.xml
 
 modules:
   jmeter:
-    path: /opt/apache-jmeter
+    path: /opt/jmeter
     
-reporting:
-- module: final-stats
-  dump-xml: MarvelBaseline.xml
-  
 settings:
   check-interval: 5s
   default-executor: jmeter
