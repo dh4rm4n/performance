@@ -12,13 +12,6 @@ pipeline {
         label params.AGENTE_EJECUCION
     }
 
-    options {
-    	echo 'Opciones aqui'
-        //sendSplunkConsoleLog()
-        //splunkinsJobOption enableDiagram: true
-        //skipDefaultCheckout()
-    }
-
     environment {
         SCM_URL = "https://github.com/dh4rm4n/performance.git"
         SCM_CREDENTIALS = "Main_User" //Credenciales
