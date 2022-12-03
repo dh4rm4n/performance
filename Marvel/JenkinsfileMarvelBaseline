@@ -25,7 +25,7 @@ pipeline
 			steps {	
 				echo 'Performance Guardar Build And JobName'
 				//sh "chmod 777 /opt/jmeter/"					 
-				sh "jmeter -n -t $WORKSPACE/Marvel/Build.jmx -JJOB_NAME=Baseline_${env.BUILD_NUMBER}"
+				sh "/opt/jmeter/bin/jmeter -n -t $WORKSPACE/Marvel/Build.jmx -JJOB_NAME=Baseline_${env.BUILD_NUMBER}"
 				}
 		}
 		stage('Ejecutar prueba Baseline MarvelBaseline') {
