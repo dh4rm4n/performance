@@ -23,14 +23,6 @@ pipeline {
         //S3_URL = "Example"
     }
 
-    parameters {
-        string(
-            defaultValue: "cpt",
-            description: 'Agente en el cual se ejecutaran las pruebas',
-            name: 'AGENTE_EJECUCION'
-        )
-    }
-
     stages {
         stage('Obtener fuentes') {
             steps {
