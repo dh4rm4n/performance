@@ -24,7 +24,7 @@ pipeline
 		stage('Performance_GenerarSet_Datos') {
 			steps {	
 				echo 'Performance Guardar Build And JobName'
-				sh "chmod 777 /opt/jmeter/"					 
+				//sh "chmod 777 /opt/jmeter/"					 
 				sh "jmeter -n -t $WORKSPACE/Marvel/Build.jmx -JJOB_NAME=Baseline_${env.BUILD_NUMBER}"
 				}
 		}
@@ -33,7 +33,7 @@ pipeline
 				script {
 					try{
 						echo "Performance WS MarvelBaselineBaseline"
-						sh "chmod 777 /opt/jmeter/"
+						//sh "chmod 777 /opt/jmeter/"
 						sh "bzt Marvel/MarvelBaseline.yml Marvel/passfail_config.yml"
 						perfReport 'MarvelBaseline.xml'						
 					} 
