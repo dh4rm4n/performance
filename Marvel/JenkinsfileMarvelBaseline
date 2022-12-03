@@ -13,9 +13,9 @@ pipeline {
     }
 
     options {
-        sendSplunkConsoleLog()
-        splunkinsJobOption enableDiagram: true
-        skipDefaultCheckout()
+        //sendSplunkConsoleLog()
+        //splunkinsJobOption enableDiagram: true
+        //skipDefaultCheckout()
     }
 
     environment {
