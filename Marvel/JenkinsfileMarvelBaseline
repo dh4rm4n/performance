@@ -1,114 +1,85 @@
 import java.text.SimpleDateFormat
-import java.sql.Timestamp
 import java.util.concurrent.TimeUnit
-
 def dateFormat = new SimpleDateFormat("yyyyMMddHHmm")
 def date = new Date()
 def timestamp = dateFormat.format(date).toString()
-
-pipeline {
-
-    agent {
-        label params.AGENTE_EJECUCION
+																																		 
+pipeline
+{
+	options {
+      timeout(time: 60, unit: 'MINUTES') 
     }
+	agent any
 
     environment {
         SCM_URL = "https://github.com/dh4rm4n/performance.git"
-        SCM_CREDENTIALS = "Main_User" //Credenciales
+        SCM_CREDENTIALS = "Master_User" //Credenciales
         SCM_BRANCH = "main" //Rama git
-        NOMBRE_PROYECTO_GIT = "CPT" //Nombre del proyecto en GIT
-        NOMBRE_TRANSACCION = "CPT - Marvel - Baseline" //Nombre del proyecto para asunto del correo
-        //PROXY = "Example"
-        EMAIL_DEVELOPERS = "dh4rm4n@gmail.com;"
-        //S3_URL = "Example"
+        NOMBRE_PROYECTO_GIT = "Marvel" //Marvel  // 
+        NOMBRE_TRANSACCION = "Performance - Marvel - Baseline" //Nombre del proyecto para asunto del correo
+        EMAIL_DEVELOPERS = "dh4rm4n@gmail.com"
     }
 
-    stages {
-        stage('Obtener fuentes') {
-            steps {
-                script {               
-					sh "git config --global --replace-all http.sslVerify false"
-					checkout scm: ([
-						$class: 'GitSCM',
-						branches: [[name: "${SCM_BRANCH}"]],
-						doGenerateSubmoduleConfigurations: false,
-						extensions: [],
-						submoduleCfg: [],
-						userRemoteConfigs: [[credentialsId: "${SCM_CREDENTIALS}", url: "${SCM_URL}"]]
-						
-					])                    
-                }
-            }
-        }
-
+	stages {
 		stage('Performance_GenerarSet_Datos') {
-            steps {   
-                                    
-                 sh "chmod 777 /opt/jmeter/"                    
-                 echo 'Performance Guardar Build And JobName'
-                 sh "/opt/jmeter/bin/jmeter -n -t $WORKSPACE/Marvel/Build.jmx -JJOB_NAME=Baseline_${env.BUILD_NUMBER}"       
-				 //echo 'Ejecutar Generacion de token'
-                 //sh "bzt $WORKSPACE/Marvel/Token.yml"
-                   
-                  }               
-            }
-
-        stage('Ejecutar pruebas') {
+			steps {	
+				echo 'Performance Guardar Build And JobName'
+				sh "chmod 777 /opt/jmeter/"					 
+				sh "jmeter -n -t $WORKSPACE/Marvel/Build.jmx -JJOB_NAME=Baseline_${env.BUILD_NUMBER}"
+				}
+		}
+		stage('Ejecutar prueba Baseline MarvelBaseline') {
             steps {
 				script {
 					try{
+						echo "Performance WS MarvelBaselineBaseline"
 						sh "chmod 777 /opt/jmeter/"
-						echo "Ejecutar Performance Test"
-						sh "bzt $WORKSPACE/Marvel/MarvelBaseline.yml $WORKSPACE/Marvel/passfail_config.yml"
-						sh "tar zcvf Log_Marvel.zip Logs/Log_Marvel.csv"
-						
+						sh "bzt Marvel/MarvelBaseline.yml Marvel/passfail_config.yml"
+						perfReport 'MarvelBaseline.xml'						
 					} 
-					catch(err)
+					catch(ex)
                     {
-                       	echo 'Finalizo ejecucion con fallos'
-						sh "tar zcvf Log_Marvel.zip Logs/Log_Marvel.csv"
-						sh "neoload.exe -project Error.npl"						
-                    }				
-				}
+						echo 'Finalizo ejecucion con fallos'
+						//bat "neoload.exe -project Error.npl"
+                    }
+				}	
             }
-        }      
-    }
-	
+        }
+	}
 	post {		
         success {  
+			//bat "7z.exe a LogMarvelBaselineBaseline_${env.BUILD_NUMBER}.zip ConsultaCampanas\\LogMarvelBaselineBaseline.jtl"
         	enviarCorreo("SUCCESS")
         }  
         failure {  
+			//bat "7z.exe a LogMarvelBaselineBaseline_${env.BUILD_NUMBER}.zip ConsultaCampanas\\LogMarvelBaselineBaseline.jtl"
+			//perfReport 'MarvelBaselineBaseline.xml'						
             enviarCorreo("FAILURE")
         }
     }
 }
+
 def enviarCorreo(resultadoTest) {
     def asunto = ""
-    def recibe = "${EMAIL_DEVELOPERS}"
+    def recibe = "dh4rm4n@gmail.com"
     def resultado = ""
     def hero = ""
-    def nombreProyecto = "Prueba CPT"
-    def currentTime = new Date(currentBuild.timeInMillis)
-    def currentTimeFinal = new Date(currentBuild.timeInMillis + TimeUnit.MINUTES.toMillis(15))
+    def nombreProyecto = "MarvelBaseline"
+    def currentTime = new Date(currentBuild.timeInMillis)    
+	def currentTimeFinal = new Date(currentBuild.timeInMillis + TimeUnit.MINUTES.toMillis(10))
     def formato = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
 	def formatoTimeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
     def timeInicioPruebas = formato.format(currentTime)
-	def	TimestampInicioPruebas = formatoTimeStamp.format(currentTime)
-	def	TimestampFinalPruebas = formatoTimeStamp.format(currentTimeFinal)
-	def tsInicial = Timestamp.valueOf(TimestampInicioPruebas)
-	def tsFinal = Timestamp.valueOf(TimestampFinalPruebas)
-	def TimestampInicial = tsInicial.getTime()
-	def TimestampFinal = tsFinal.getTime()
-    def urlEvidencia = "http://choucaircpt.choucairtesting.com:3000/d/i8sq0SM7z/kpis?orgId=1&var-Proyecto=PortalAfiliados&var-Funcionalidad=Marvel&var-Escenario=Baseline&var-Build=Baseline_${env.BUILD_NUMBER}"  //pendiente cambiar
-					     
-
+	
+	def NOMBRE_TRANSACCION = "MarvelBaselineBaseline" //Nombre del proyecto para asunto del correo
+	def NOMBRE_PROYECTO_GIT = "Ventas en ATM" //Nombre del proyecto en GIT
+	
 	if (resultadoTest == "SUCCESS") {
-		asunto = "CPT - EJECUCION EXITOSA ESCENARIOS - TRANSACCION ${NOMBRE_TRANSACCION}"
+		asunto = "CPT - EJECUCION AUTOMATICA EXITOSA ESCENARIO - TRANSACCION ${NOMBRE_TRANSACCION}"
 		resultado = """<b class="execTitle" style="color:#032d9f;border:3px solid ;border-radius: 9px; padding:0px 12px 0 12px;">EJECUCION EXITOSA</b>"""
 		hero = "Todo va bien en la transacci&oacute;n. Para m&aacute;s detalles remitase a los enlaces en la parte inferior de este correo."
 	} else {
-		asunto = "CPT - EJECUCION FALLIDA ESCENARIOS - TRANSACCION ${NOMBRE_TRANSACCION}"
+		asunto = "CPT - EJECUCION AUTOMATICA FALLIDA ESCENARIO - TRANSACCION ${NOMBRE_TRANSACCION}"
 		resultado = """<b class="execTitle" style="color:#c90000;border:3px solid #c90000;border-radius: 9px; padding:0px 12px 0 12px;">EJECUCION FALLIDA</b>"""
 		hero = "Se ha encontrado un error en la transacci&oacute;n. Para m&aacute;s detalles remitase a los enlaces en la parte inferior de este correo."
 	}
@@ -216,7 +187,7 @@ def enviarCorreo(resultadoTest) {
 												</td>
 											</tr>									
 										</table>
-										<!-- End Titulo -->								
+										<!-- End Titulo Choucair-->								
 										
 										<!-- Header -->
 										<table width="100%" border="0" cellspacing="0" cellpadding="0">
@@ -267,10 +238,8 @@ def enviarCorreo(resultadoTest) {
 																<table width="100%" border="0" cellspacing="0" cellpadding="0">
 																	<tr>
 																		<td class="img m-center" style="font-size:0pt; line-height:0pt; text-align:left;">
-																			<!--Logo Blanco-->
-																			<!--<img src="https://www.unipymes.com/wp-content/uploads/2014/03/proteccion_logo-n.jpg" width="116" height="70" border="0" alt="" />-->
-																			<!--Logo Amarillo-->
-																			<img src="https://www.proteccion.com/wps/contenthandler/proteccion/!ut/p/digest!gn5plQuhNeIvIIC8kaLiLg/dav/fs-type1/themes/TemaProteccion/images/proteccion/twitter_cards.png" width="116" height="70" border="0" alt="" />
+																			<!--Logo BanBif-->
+																			<img src="https://www.banbif.com.pe//Portals/0/home/personas/img/logo-header-400.png" width="116" height="70" border="0" alt="" />																	
 																		</td>
 																	</tr>
 																</table>
@@ -311,58 +280,6 @@ def enviarCorreo(resultadoTest) {
 										</table>
 										<!-- END Logo + Resultado ejecución -->
 										
-										<!-- Grafana -->
-										<table width="100%" border="0" cellspacing="0" cellpadding="0">
-											<tr>
-												<td style="padding-bottom: 10px;">
-													<table width="100%" border="0" cellspacing="0" cellpadding="0" dir="rtl" style="direction: rtl;">
-														<tr>
-															<th class="column-dir" dir="ltr" width="245" style="font-size:0pt; line-height:0pt; padding:0; margin:0; font-weight:normal; direction:ltr;background:#ffffff;border-radius:0px 10px 10px 0px">
-																<table width="100%" border="0" cellspacing="0" cellpadding="0">
-																	<!-- Button -->
-																	<tr>
-																		<td align="center">
-																			<table border="0" cellspacing="0" cellpadding="0">
-																				<tr>
-																					<td class="text-button" style="background:#ded7d7; color:#ffffff; font-family:'Poppins', Arial,sans-serif; font-size:14px; line-height:18px; padding:12px 30px; text-align:center; border-radius:22px;">
-																						<a href="${urlEvidencia}" target="_blank" class="link-white" style="color:#ffffff; text-decoration:none;">
-																							<span class="link-white" style="color:#080808; text-decoration:none;">
-																								<b>Ir al Tablero</b>
-																							</span>
-																						</a>
-																					</td>
-																				</tr>
-																			</table>
-																		</td>
-																	</tr>
-																	<!-- END Button -->
-																</table>
-															</th>
-															<th class="column-dir" dir="ltr" style="font-size:0pt; line-height:0pt; padding:0; margin:0; font-weight:normal; direction:ltr;">
-																<table width="100%" border="0" cellspacing="0" cellpadding="0">
-																	<tr>
-																		<td class="p30-15 brl" style="padding: 20px; border-radius:10px 0px 0px 10px;" bgcolor="#ffffff" height="30">
-																			<table width="100%" border="0" cellspacing="0" cellpadding="0">
-																				<tr>
-																					<td class="fluid-img mbr" style="font-size:0pt; line-height:0pt; text-align:center;">																	
-																						<img src="https://miro.medium.com/max/480/1*UqgMgl_BvAyJvNb9eTy4Wg.png" title="source: medium.com" width="100" height="70" border="0" alt="grafana.logo" />
-																					</td>
-																					<td class="h3 pb20" style="color:#445942; font-family:'Poppins', Arial,sans-serif; font-size:12px; line-height:24px; text-align:center; padding-bottom:5px;">
-																						Conozca los resultados de la prueba en el dashboard de Rendimiento.
-																					</td>
-																				</tr>																		
-																			</table>
-																		</td>
-																	</tr>
-																</table>
-															</th>
-														</tr>
-													</table>
-												</td>
-											</tr>
-										</table>
-										<!-- Grafana -->
-
 										<!-- Jenkins -->
 										<table width="100%" border="0" cellspacing="0" cellpadding="0">
 											<tr>
@@ -377,7 +294,7 @@ def enviarCorreo(resultadoTest) {
 																			<table border="0" cellspacing="0" cellpadding="0">
 																				<tr>
 																					<td class="text-button" style="background:#ded7d7; color:#ffffff; font-family:'Poppins', Arial,sans-serif; font-size:14px; line-height:18px; padding:12px 30px; text-align:center; border-radius:22px;">
-																						<a href="${env.BUILD_URL}" target="_blank" class="link-white" style="color:#ffffff; text-decoration:none;">
+																						<a href="${env.BUILD_URL}/performance/" target="_blank" class="link-white" style="color:#ffffff; text-decoration:none;">
 																							<span class="link-white" style="color:#080808; text-decoration:none;">
 																								<b>Ir a Jenkins</b>
 																							</span>
@@ -423,11 +340,10 @@ def enviarCorreo(resultadoTest) {
 			</body>
 		</html>
 	"""
-
 	emailext(
-		attachmentsPattern: "**/Log_Marvel.zip",
+		attachmentsPattern: "**/LogMarvelBaselineBaseline_${env.BUILD_NUMBER}.zip",
 		subject: "${asunto}",
 		body: "${body}",
 		to: "${recibe}"
 	)
-}
+}	
