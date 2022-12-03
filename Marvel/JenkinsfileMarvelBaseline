@@ -13,6 +13,7 @@ pipeline {
     }
 
     options {
+    	echo "Opciones aqui"
         //sendSplunkConsoleLog()
         //splunkinsJobOption enableDiagram: true
         //skipDefaultCheckout()
